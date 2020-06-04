@@ -1,0 +1,24 @@
+{
+  "name": "natours",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API built with Node, Express and MongoDB",
+  "main": "app.js",
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "scripts": {
+    "start:dev": "nodemon server.js",
+    "start:prod": "NODE_ENV=production nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/perezcr/natours.git"
+  },
+  "author": "perezcr",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/perezcr/natours/issues"
+  },
+  "homepage": "https://github.com/perezcr/natours#readme"
+}
