@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/perezcr/natours/issues"
   },
-  "homepage": "https://github.com/perezcr/natours#readme"
+  "homepage": "https://github.com/perezcr/natours#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
