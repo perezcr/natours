@@ -2,6 +2,9 @@
   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 ); */
 
+// Param-middleware: Middleware only just for certain parameters in URL. i.e.
+// router.param('id', checkId);
+
 // Using json method set automatically content-type to application/json
 exports.getAllTours = (req, res, next) => {
   res.status(200).json({

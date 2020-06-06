@@ -34,6 +34,11 @@ if (process.env.NODE_ENV === 'development') {
 // Not accept body larger than 10kb
 app.use(express.json({ limit: '10kb' }));
 
+// Serving static files
+// The files that are sitting in our file system that we currently cannot access using routes
+// In order to access to file system is necessary to use a built-in express middleware
+app.use(express.static(`${__dirname}/public`));
+
 // Create own middlewares
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
