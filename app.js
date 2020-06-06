@@ -15,8 +15,16 @@
 // contain ALL the information necessary to process a certain request. The server should NOT have
 // to remember previous request
 const express = require('express');
+const morgan = require('morgan');
 
 const app = express();
+
+// 1. Middlewares
+
+// Development Logging
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
 
 // Reading data from body into req.body
 // Function that modify the incoming request data (middle of the request and response)
@@ -29,5 +37,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Start server
+// 2. Routes
+
+// 3. Start Server
 module.exports = app;
