@@ -17,6 +17,8 @@
 const express = require('express');
 const morgan = require('morgan');
 
+const tourRouter = require('./routes/tourRoutes');
+
 const app = express();
 
 // 1. Middlewares
@@ -38,6 +40,7 @@ app.use((req, res, next) => {
 });
 
 // 2. Routes
+app.use('/api/v1/tours', tourRouter);
 
 // 3. Start Server
 module.exports = app;
