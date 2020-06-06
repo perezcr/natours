@@ -18,5 +18,16 @@ const express = require('express');
 
 const app = express();
 
+// Reading data from body into req.body
+// Function that modify the incoming request data (middle of the request and response)
+// Not accept body larger than 10kb
+app.use(express.json({ limit: '10kb' }));
+
+// Create own middlewares
+app.use((req, res, next) => {
+  req.requestTime = new Date().toISOString();
+  next();
+});
+
 // Start server
 module.exports = app;
