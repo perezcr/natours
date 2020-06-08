@@ -1,3 +1,30 @@
+## Architecture
+<p align="center">
+  <img src="notes-imgs/4.png" alt="Architecture">
+</p>
+
+### Applications vs Business Logic
+#### Application Logic
+* Code that is only concerned about the application's implementation, not the underlying business problem we're trying to solve (e.g showing and selling tours).
+* Concerned about managing requests and responses.
+* About the app's more technical aspects.
+* Bridge between model and view layers
+
+#### Business Logic
+* Code that actually solves the business problem we set out to solve.
+* Directly related to business rules, how the business works, and business needs.
+* Examples:
+  * Creating new tours in the database.
+  * Checking if user's password is correct.
+  * Validating user input data.
+  * Ensuring only users who bought a tour can review it.
+
+<p align="center">
+  <img src="notes-imgs/5.png" alt="Business-Application">
+</p>
+
+> Fat Models / Thin Controllers: Offload as much logic as possible into the models, and keep the controllers as simple and lean as possible.
+
 ## MongoDB
 MongoDB is a document database with the scalability and flexibility that you want with the querying and indexing that you need.
 <p align="center">
@@ -82,3 +109,22 @@ $ db.<collection-name>.deleteMany({})
 # Exit from Mongo Shell
 $ quit()
 ```
+
+### Mongoose
+* Mongoose is an Object Data Modeling (ODM) library for MongoDB and Node.js, a higher level of abstraction, allowing for rapid and simple development of MongoDB database interactions.
+
+#### Features
+* Schemas to Model data and relationships.
+* Easy data validation.
+* Simple query API.
+* Middleware, etc.
+
+<p align="center">
+  <img src="notes-imgs/3.png" alt="Mongoose">
+</p>
+
+#### Moongose Schema
+Where we model our data, by describing the structure of the data, default values, and validation.
+
+#### Moongose Model
+A blueprint for create documents, providing an interface to the database for CRUD operations.
