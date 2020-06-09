@@ -53,7 +53,9 @@ exports.updateTour = async (req, res, next) => {
   });
 };
 
-exports.deleteTour = (req, res, next) => {
+exports.deleteTour = async (req, res, next) => {
+  await Tour.findByIdAndDelete(req.params.id);
+
   // 204 = No Content
   res.status(204).json({
     result: 'success',
