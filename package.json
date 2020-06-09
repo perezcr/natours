@@ -9,7 +9,9 @@
   },
   "scripts": {
     "start": "nodemon server.js",
-    "start:prod": "NODE_ENV=production nodemon server.js"
+    "start:prod": "NODE_ENV=production nodemon server.js",
+    "seed:db": "node dev-data/import-dev-data.js --import",
+    "delete:db": "node dev-data/import-dev-data.js --delete"
   },
   "repository": {
     "type": "git",
