@@ -7,21 +7,29 @@ const Tour = require('../models/Tour');
 // router.param('id', checkId);
 
 // Using json method set automatically content-type to application/json
-exports.getAllTours = (req, res, next) => {
+exports.getAllTours = async (req, res, next) => {
+  const tours = await Tour.find();
+
   res.status(200).json({
     status: 'success',
     requestAt: req.requestTime,
+    results: tours.length,
+    data: { tours },
   });
 };
 
-exports.getTour = (req, res, next) => {
+exports.getTour = async (req, res, next) => {
+  const tour = await Tour.findById(req.params.id);
+
   res.status(200).json({
     status: 'success',
+    data: { tour },
   });
 };
 
 exports.createTour = async (req, res, next) => {
   const newTour = await Tour.create(req.body);
+
   res.status(201).json({
     result: 'success',
     data: {
