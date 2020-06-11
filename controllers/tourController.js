@@ -9,7 +9,8 @@ exports.getAllTours = async (req, res, next) => {
   const features = new APIFeatures(Tour.find(), req.query)
     .filter()
     .sorting()
-    .limitFields();
+    .limitFields()
+    .paginate();
 
   const tours = await features.query;
 
