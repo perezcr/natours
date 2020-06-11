@@ -35,6 +35,19 @@ class APIFeatures {
 
     return this;
   }
+
+  limitFields() {
+    // 3. Field Limiting
+    if (this.queryString.fields) {
+      const fields = this.queryString.fields.split(',').join(' ');
+      this.query = this.query.select(fields);
+    } else {
+      // - means excluding
+      this.query = this.query.select('-__v');
+    }
+
+    return this;
+  }
 }
 
 module.exports = APIFeatures;

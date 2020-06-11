@@ -1,15 +1,15 @@
 const Tour = require('../models/Tour');
 const APIFeatures = require('../utils/apiFeatures');
-/* const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
-); */
 
 // Param-middleware: Middleware only just for certain parameters in URL. i.e.
 // router.param('id', checkId);
 
 // Using json method set automatically content-type to application/json
 exports.getAllTours = async (req, res, next) => {
-  const features = new APIFeatures(Tour.find(), req.query).filter().sorting();
+  const features = new APIFeatures(Tour.find(), req.query)
+    .filter()
+    .sorting()
+    .limitFields();
 
   const tours = await features.query;
 
