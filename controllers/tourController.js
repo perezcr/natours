@@ -9,7 +9,7 @@ const APIFeatures = require('../utils/apiFeatures');
 
 // Using json method set automatically content-type to application/json
 exports.getAllTours = async (req, res, next) => {
-  const features = new APIFeatures(Tour.find(), req.query).filter();
+  const features = new APIFeatures(Tour.find(), req.query).filter().sorting();
 
   const tours = await features.query;
 

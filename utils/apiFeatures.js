@@ -21,6 +21,20 @@ class APIFeatures {
 
     return this;
   }
+
+  sorting() {
+    // 2. Sorting
+    if (this.queryString.sort) {
+      // Multiple Sort: ?sort=-price,ratingsAverage
+      const sortBy = this.queryString.sort.split(',').join(' ');
+      this.query = this.query.sort(sortBy);
+    } else {
+      // Default Sorting
+      this.query = this.query.sort('-createdAt');
+    }
+
+    return this;
+  }
 }
 
 module.exports = APIFeatures;
