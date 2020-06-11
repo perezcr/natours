@@ -1,4 +1,5 @@
 const Tour = require('../models/Tour');
+const APIFeatures = require('../utils/apiFeatures');
 /* const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 ); */
@@ -8,7 +9,9 @@ const Tour = require('../models/Tour');
 
 // Using json method set automatically content-type to application/json
 exports.getAllTours = async (req, res, next) => {
-  const tours = await Tour.find();
+  const features = new APIFeatures(Tour.find(), req.query).filter();
+
+  const tours = await features.query;
 
   res.status(200).json({
     status: 'success',

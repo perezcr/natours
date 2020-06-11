@@ -14,7 +14,7 @@ mongoose
     useFindAndModify: false,
     useUnifiedTopology: true,
   })
-  .then(() => console.log('DB connection succesful!'));
+  .then(() => console.log('DB connection successful!'));
 
 // Environment variables are global variables that are used to define the environment in which node app is running
 // console.log(process.env);
