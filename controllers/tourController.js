@@ -4,6 +4,16 @@ const APIFeatures = require('../utils/apiFeatures');
 // Param-middleware: Middleware only just for certain parameters in URL. i.e.
 // router.param('id', checkId);
 
+// Aliasing: Provide an alias route to a request that might be very popular, so it might be requested all the time.
+// e.g: Provide a route specifically for the five best cheap tours.
+exports.aliasTopTours = async (req, res, next) => {
+  // ?limit=5&sort=-ratingAverage,price
+  req.query.limit = '5';
+  req.query.sort = '-ratingsAverage,price';
+  req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+  next();
+};
+
 // Using json method set automatically content-type to application/json
 exports.getAllTours = async (req, res, next) => {
   const features = new APIFeatures(Tour.find(), req.query)
