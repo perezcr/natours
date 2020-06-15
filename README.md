@@ -129,7 +129,7 @@ Where we model our data, by describing the structure of the data, default values
 #### Moongose Model
 A blueprint for create documents, providing an interface to the database for CRUD operations.
 
-### Aggregation Pipeline
+#### Aggregation Pipeline
 The aggregation pipeline is a framework for data aggregation modeled on the concept of data processing pipelines. Documents enter a multi-stage pipeline that transforms the documents into aggregated results.
 
 The MongoDB aggregation pipeline consists of stages. Each stage transforms the documents as they pass through the pipeline. Pipeline stages do not need to produce one output document for every input document; e.g., some stages may generate new documents or filter out documents.
@@ -138,7 +138,7 @@ The MongoDB aggregation pipeline consists of stages. Each stage transforms the d
   <img src="notes-imgs/6.png" alt="AP">
 </p>
 
-### Virtual Properties
+#### Virtual Properties
 In Mongoose, a virtual is a property that is not stored in MongoDB. Virtuals are typically used for computed properties on documents.
 
 ```javascript
@@ -162,3 +162,11 @@ doc.domain; // 'gmail.com'
 ```
 
 Mongoose virtuals are not stored in MongoDB, which means you can't query based on Mongoose virtuals.
+
+#### Mongoose Middlewares
+Mongoose middleware to make something happen between two events. We can define functions to run before or after a certain event, like saving a document to the database, and that's the reason why Mongoose middleware is also called pre and post hooks.
+
+Mongoose has 4 types of middleware: document middleware, model middleware, aggregate middleware, and query middleware.
+
+##### Document Middleware
+Middleware that can act on the currently processed document. In document middleware functions, **this** refers to the document. Runs before **save()** and **create()** (NOT in **insertMany()**).
