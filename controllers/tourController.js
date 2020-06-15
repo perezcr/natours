@@ -117,3 +117,54 @@ exports.getToursStats = async (req, res) => {
     },
   });
 };
+
+// Calculate the busiest month of a given year
+// Basically is calculate how many tours start in each month in a given year based in starDates property
+exports.getMonthlyPlan = async (req, res, next) => {
+  const year = +req.params.year;
+  const plan = await Tour.aggregate([
+    {
+      // Unwind deconstruct an array field from the info documents and then output one document for each element of the array.
+      // In this case create one tour for each element of startDates array
+      $unwind: '$startDates',
+    },
+    {
+      $match: {
+        startDates: {
+          $gte: new Date(`${year}-01-01`),
+          $lte: new Date(`${year}-12-31`),
+        },
+      },
+    },
+    {
+      $group: {
+        _id: { $month: '$startDates' }, // $month: Returns the month of a date as a number between 1 and 12.
+        numTourStarts: { $sum: 1 },
+        tours: { $push: '$name' }, // $push: Appends a specified value to an array. Create an array with name of tours.
+      },
+    },
+    {
+      $addFields: { month: '$_id' }, // $addFields: Appends new fields to existing documents.
+    },
+    {
+      // $project: Passes along the documents with the requested fields to the next stage in the pipeline.
+      // 0 not shows up or 1 shows up
+      $project: {
+        _id: 0,
+      },
+    },
+    {
+      $sort: { numTourStarts: -1 },
+    },
+    {
+      $limit: 12,
+    },
+  ]);
+
+  res.status(200).json({
+    result: 'success',
+    data: {
+      plan,
+    },
+  });
+};
