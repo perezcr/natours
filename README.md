@@ -137,3 +137,28 @@ The MongoDB aggregation pipeline consists of stages. Each stage transforms the d
 <p align="center">
   <img src="notes-imgs/6.png" alt="AP">
 </p>
+
+### Virtual Properties
+In Mongoose, a virtual is a property that is not stored in MongoDB. Virtuals are typically used for computed properties on documents.
+
+```javascript
+const userSchema = mongoose.Schema(
+  { email: String },
+  {
+    // By default, Mongoose does not include virtuals when you convert a document to JSON.
+    // Set the toJSON schema option to { virtuals: true }.
+    toJSON: { virtuals: true }
+  }
+);
+// Create a virtual property `domain` that's computed from `email`.
+userSchema.virtual('domain').get(function() {
+  return this.email.slice(this.email.indexOf('@') + 1);
+});
+const User = mongoose.model('User', userSchema);
+
+let doc = await User.create({ email: 'test@gmail.com' });
+// `domain` is now a property on User documents.
+doc.domain; // 'gmail.com'
+```
+
+Mongoose virtuals are not stored in MongoDB, which means you can't query based on Mongoose virtuals.
