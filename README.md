@@ -128,3 +128,12 @@ Where we model our data, by describing the structure of the data, default values
 
 #### Moongose Model
 A blueprint for create documents, providing an interface to the database for CRUD operations.
+
+### Aggregation Pipeline
+The aggregation pipeline is a framework for data aggregation modeled on the concept of data processing pipelines. Documents enter a multi-stage pipeline that transforms the documents into aggregated results.
+
+The MongoDB aggregation pipeline consists of stages. Each stage transforms the documents as they pass through the pipeline. Pipeline stages do not need to produce one output document for every input document; e.g., some stages may generate new documents or filter out documents.
+
+<p align="center">
+  <img src="notes-imgs/6.png" alt="AP">
+</p>

@@ -4,6 +4,7 @@ const {
   getAllTours,
   createTour,
   getTour,
+  getToursStats,
   updateTour,
   deleteTour,
 } = require('../controllers/tourController');
@@ -12,6 +13,8 @@ const router = express.Router();
 
 // Aliasing
 router.route('/top-5-cheap').get(aliasTopTours, getAllTours);
+
+router.route('/tour-stats').get(getToursStats);
 
 router.route('/').get(getAllTours).post(createTour);
 
