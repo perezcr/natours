@@ -173,3 +173,6 @@ Middleware that can act on the currently processed document. In document middlew
 
 ##### Query Middleware
 Allow run functions before or after that a query is executed.
+
+#### Aggregation Middleware
+Aggregate middleware executes when you call **exec()** on an aggregate object.
