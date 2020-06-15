@@ -64,6 +64,10 @@ const tourSchema = new mongoose.Schema(
       select: false,
     },
     startDates: [Date],
+    secretTour: {
+      type: Boolean,
+      default: false,
+    },
   },
   // By default, Mongoose does not include virtuals when you convert a document to JSON.
   // Set the toJSON schema option to { virtuals: true }.
@@ -93,6 +97,21 @@ tourSchema.pre('save', function (next) {
   console.log(doc);
   next();
 }); */
+
+// 2. Query middleware: allow run functions before or after that a query is executed
+// Create a regular expression for all string that start with find.
+tourSchema.pre(/^find/, function (next) {
+  this.find({ secretTour: { $ne: true } });
+
+  this.start = Date.now();
+  next();
+});
+
+tourSchema.post(/^find/, function (docs, next) {
+  // eslint-disable-next-line no-console
+  console.log(`Query took ${Date.now() - this.start} milliseconds `);
+  next();
+});
 
 const Tour = mongoose.model('Tour', tourSchema);
 

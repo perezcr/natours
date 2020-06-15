@@ -14,7 +14,10 @@ mongoose
     useFindAndModify: false,
     useUnifiedTopology: true,
   })
-  .then(() => console.log('DB connection succesful!'));
+  .then(() => {
+    // eslint-disable-next-line no-console
+    console.log('DB connection succesful!');
+  });
 
 // Read JSON file
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours-simple.json`, 'utf-8'));
@@ -23,8 +26,10 @@ const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours-simple.json`, 'utf-
 const importData = async () => {
   try {
     await Tour.create(tours);
+    // eslint-disable-next-line no-console
     console.log('Data succesfully loaded!');
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.log(error);
   }
   process.exit();
@@ -34,8 +39,10 @@ const importData = async () => {
 const deleteData = async () => {
   try {
     await Tour.deleteMany();
+    // eslint-disable-next-line no-console
     console.log('Data succesfully deleted!');
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.log(error);
   }
   process.exit();

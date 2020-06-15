@@ -14,11 +14,15 @@ mongoose
     useFindAndModify: false,
     useUnifiedTopology: true,
   })
-  .then(() => console.log('DB connection successful!'));
+  .then(() => {
+    // eslint-disable-next-line no-console
+    console.log('DB connection successful!');
+  });
 
 // Environment variables are global variables that are used to define the environment in which node app is running
 // console.log(process.env);
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
+  // eslint-disable-next-line no-console
   console.log(`App running on port ${port} 🔥`);
 });

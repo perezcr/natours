@@ -170,3 +170,6 @@ Mongoose has 4 types of middleware: document middleware, model middleware, aggre
 
 ##### Document Middleware
 Middleware that can act on the currently processed document. In document middleware functions, **this** refers to the document. Runs before **save()** and **create()** (NOT in **insertMany()**).
+
+##### Query Middleware
+Allow run functions before or after that a query is executed.
