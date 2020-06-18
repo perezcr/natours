@@ -176,3 +176,20 @@ Allow run functions before or after that a query is executed.
 
 #### Aggregation Middleware
 Aggregate middleware executes when you call **exec()** on an aggregate object.
+
+## Error Handling
+There are two types of errors that can occur **Operational Errors** and **Programming Errors**.
+
+### Operational Errors
+Operational errors are problems that we can predict will inevitably happen at some point in the future. And so we just need to handle them in advance. They have nothing to do with bugs in our code. Instead, they depend on the user, or the system, or the network.
+
+So, things like a user accessing an invalid route, inputting invalid data, or an application failing to connect to the database. All these are operational errors that we will need to handle in order to prepare our application for these cases.
+
+### Programming Errors
+On the other hand, we have programming errors. Which are simply bugs that we developers introduce into our code.
+
+<p align="center">
+  <img src="notes-imgs/7.png" alt="Error Handling">
+</p>
+
+So, when we're talking about error handling with Express, we mainly just mean operational errors. Because these are the ones that are easy to catch and to handle with our Express application. And Express actually comes with error handling out of the box. So, all we have to do is to write a global express error handling middleware which will then catch errors coming from all over the application.
