@@ -1,5 +1,6 @@
 const Tour = require('../models/Tour');
 const APIFeatures = require('../utils/apiFeatures');
+const catchAsync = require('../utils/catchAsync');
 
 // Param-middleware: Middleware only just for certain parameters in URL. i.e.
 // router.param('id', checkId);
@@ -15,7 +16,7 @@ exports.aliasTopTours = async (req, res, next) => {
 };
 
 // Using json method set automatically content-type to application/json
-exports.getAllTours = async (req, res, next) => {
+exports.getAllTours = catchAsync(async (req, res, next) => {
   const features = new APIFeatures(Tour.find(), req.query)
     .filter()
     .sorting()
@@ -30,18 +31,18 @@ exports.getAllTours = async (req, res, next) => {
     results: tours.length,
     data: { tours },
   });
-};
+});
 
-exports.getTour = async (req, res, next) => {
+exports.getTour = catchAsync(async (req, res, next) => {
   const tour = await Tour.findById(req.params.id);
 
   res.status(200).json({
     status: 'success',
     data: { tour },
   });
-};
+});
 
-exports.createTour = async (req, res, next) => {
+exports.createTour = catchAsync(async (req, res, next) => {
   const newTour = await Tour.create(req.body);
 
   res.status(201).json({
@@ -50,9 +51,9 @@ exports.createTour = async (req, res, next) => {
       tour: newTour,
     },
   });
-};
+});
 
-exports.updateTour = async (req, res, next) => {
+exports.updateTour = catchAsync(async (req, res, next) => {
   // new: true -> return the new document
   const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
@@ -65,9 +66,9 @@ exports.updateTour = async (req, res, next) => {
       tour,
     },
   });
-};
+});
 
-exports.deleteTour = async (req, res, next) => {
+exports.deleteTour = catchAsync(async (req, res, next) => {
   await Tour.findByIdAndDelete(req.params.id);
 
   // 204 = No Content
@@ -75,10 +76,10 @@ exports.deleteTour = async (req, res, next) => {
     result: 'success',
     data: null,
   });
-};
+});
 
 // Aggregation Pipeline
-exports.getToursStats = async (req, res) => {
+exports.getToursStats = catchAsync(async (req, res, next) => {
   // Input: Array of Stages
   const stats = await Tour.aggregate([
     // Stage 1 (Match Stage)
@@ -116,11 +117,11 @@ exports.getToursStats = async (req, res) => {
       stats,
     },
   });
-};
+});
 
 // Calculate the busiest month of a given year
 // Basically is calculate how many tours start in each month in a given year based in starDates property
-exports.getMonthlyPlan = async (req, res, next) => {
+exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
   const year = +req.params.year;
   const plan = await Tour.aggregate([
     {
@@ -167,4 +168,4 @@ exports.getMonthlyPlan = async (req, res, next) => {
       plan,
     },
   });
-};
+});
