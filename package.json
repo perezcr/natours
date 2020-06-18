@@ -11,7 +11,8 @@
     "start": "nodemon server.js",
     "start:prod": "NODE_ENV=production nodemon server.js",
     "seed:db": "node dev-data/import-dev-data.js --import",
-    "delete:db": "node dev-data/import-dev-data.js --delete"
+    "delete:db": "node dev-data/import-dev-data.js --delete",
+    "debug": "ndb server.js"
   },
   "repository": {
     "type": "git",
