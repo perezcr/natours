@@ -17,6 +17,8 @@
 const express = require('express');
 const morgan = require('morgan');
 
+const AppError = require('./utils/appError');
+const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 
@@ -34,6 +36,11 @@ if (process.env.NODE_ENV === 'development') {
 // Not accept body larger than 10kb
 app.use(express.json({ limit: '10kb' }));
 
+// Serving static files
+// The files that are sitting in our file system that we currently cannot access using routes
+// In order to access to file system is necessary to use a built-in express middleware
+app.use(express.static(`${__dirname}/public`));
+
 // Create own middlewares
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
@@ -43,6 +50,19 @@ app.use((req, res, next) => {
 // 2. Routes
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+
+// .all -> for all the verbs (get, post, patch, put, delete)
+app.all('*', (req, res, next) => {
+  /* res.status(404).json({
+    status: 'fail',
+    message: `Can't find ${req.originalUrl} on this server`
+  }); */
+  // When next() receives an argument, express automatically knows that is an error
+  // it will skip all the other middlewares in the middleare stack and sent the error to global error handling middleware
+  next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
+});
+
+app.use(globalErrorHandler);
 
 // 3. Start Server
 module.exports = app;
