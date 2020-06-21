@@ -3,6 +3,19 @@ const dotenv = require('dotenv');
 // It will read variables in file and save them into node.js environment variables
 dotenv.config({ path: './config.env' });
 
+// Uncaught exceptions: All errors or bugs that occur in synchronous code but are not handled anywhere
+// Ex: console.log(x) when x is not defined
+// This handler should be at the very top of our code or at least before other code is executed.
+process.on('uncaughtException', (err) => {
+  // eslint-disable-next-line no-console
+  console.log(err.name, err.message);
+  // eslint-disable-next-line no-console
+  console.log('Uncaught Exception! 💥  Shutting down...');
+  // Its important crash the app because after there was an uncaught exception, the entire node process
+  // is in a called unclean state and for fix that is necessary terminate and restart the server
+  process.exit(1);
+});
+
 const app = require('./app');
 
 const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
