@@ -22,7 +22,22 @@ mongoose
 // Environment variables are global variables that are used to define the environment in which node app is running
 // console.log(process.env);
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
+const server = app.listen(port, () => {
   // eslint-disable-next-line no-console
   console.log(`App running on port ${port} 🔥`);
+});
+
+// Whatever promise rejection that we might not catch somewhere in the app is handled here
+// We're listening the unhandledevent which then allow us to handle all the errors that occour in async code which were not previously handled
+process.on('unhandledRejection', (err) => {
+  // eslint-disable-next-line no-console
+  console.log(err.name, err.message);
+  // eslint-disable-next-line no-console
+  console.log('Unhandled rejection! 💥  Shutting down...');
+  // Give the server, time to finish all the request pending or being handled at time
+  server.close(() => {
+    // Shut down app
+    // argument: 0 -> success, 1 -> uncaught exception
+    process.exit(1);
+  });
 });
