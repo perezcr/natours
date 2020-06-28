@@ -54,6 +54,11 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+// Instance method: is a method that is gonna be available on all documents of a certain collection
+userSchema.methods.correctPassword = async (candidatePassword, userPassword) => {
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
+
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
