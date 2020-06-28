@@ -1,9 +1,17 @@
-exports.getAllUsers = (req, res) => {
+const User = require('../models/User');
+const catchAsync = require('../utils/catchAsync');
+
+exports.getAllUsers = catchAsync(async (req, res) => {
+  const users = await User.find();
+
+  // Using json method set automatically content-type to application/json
   res.status(200).json({
     status: 'success',
     requestAt: req.requestTime,
+    results: users.length,
+    data: { users },
   });
-};
+});
 
 exports.getUser = (req, res) => {
   res.status(500).json({
