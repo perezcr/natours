@@ -95,3 +95,16 @@ exports.protect = catchAsync(async (req, res, next) => {
   req.user = currentUser;
   next();
 });
+
+// Authorization: It's verifying if a certain user has the rights or  is allowed to access a certain resource, even if he is logged in.
+// 403 http status code: Forbidden, is specific for authorization
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError('Your do not have permission to perform this action', 403)
+      );
+    }
+    next();
+  };
+};
