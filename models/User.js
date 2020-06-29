@@ -47,7 +47,7 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.pre('save', async function (next) {
-  // Only run this function if password was actually modified
+  // If password was not modified then next()
   if (!this.isModified('password')) return next();
   // Hash the password with cost of 12: the password will be better encrypted and will take more time
   // Not use the sync version because it will be block the event loop and then prevent other users from using this app
@@ -55,6 +55,17 @@ userSchema.pre('save', async function (next) {
 
   // Delete the password confirm field after validation
   this.passwordConfirm = undefined;
+  next();
+});
+
+// This function is going to run when the user change the password
+userSchema.pre('save', function (next) {
+  // If password was not modified OR if the document is new then next()
+  if (!this.isModified('password') || this.isNeW) {
+    return next();
+  }
+  // It's necessary wait one second because is posibble that the token signs first that executing this operation
+  this.passwordChangedAt = Date.now() - 1000;
   next();
 });
 
