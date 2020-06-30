@@ -44,6 +44,11 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
 });
 
 userSchema.pre('save', async function (next) {
@@ -69,6 +74,12 @@ userSchema.pre('save', function (next) {
   next();
 });
 
+// Query middleware for hide the inactive users
+userSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
+  next();
+});
+
 // Instance method: is a method that is gonna be available on all documents of a certain collection
 userSchema.methods.correctPassword = async (candidatePassword, userPassword) => {
   return await bcrypt.compare(candidatePassword, userPassword);
@@ -91,7 +102,6 @@ userSchema.methods.createPasswordResetToken = function () {
 
   // Encrypt the token
   this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
 
   return resetToken;
