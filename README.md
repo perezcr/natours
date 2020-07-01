@@ -240,3 +240,52 @@ Once the JWT is received, the verification will take it's header and payload and
 <p align="center">
   <img src="notes-imgs/10.png" alt="Signing-Verifying JWT">
 </p>
+
+## Security Best Practices and Suggestions
+
+### Compromised Database
+An attacker gained access to our database.
+* :white_check_mark: Strongly encrypt passwords with salt and hash (bcrypt)
+* :white_check_mark: Strongly encrypt password reset tokens (SHA 256)
+
+### Brute Force Attacks
+Where the attacker basically tries to guess a password by trying millions and millions of random passwords until they find the right one.
+* :white_check_mark: Use bcrypt (to make login requests slow)
+* :white_check_mark: Implement rate limiting, which limits the number of requests coming from one single IP (express-rate-limiting)
+* :memo: Implement maximum login attempts
+
+### Cross-Site Scripting (XSS) Attacks
+The attacker tries to inject scripts into our page to run his malicious code.
+#### Frontend
+On the clients' side, this is especially dangerous because it allows the attacker to read the local storage, which is the reason why we should never ever store the JSON web token in local storage. Instead, it should be stored in an HTTPOnly cookie that makes it so that the browser can only receive and send the cookie but cannot access or modify it in any way. And so, that then makes it impossible for any attacker to steal the JSON web token that is stored in the cookie.
+* :white_check_mark: Store JWT in HTTPOnly cookies
+
+#### Backend
+On the backend side, in order to prevent XSS attacks, we should sanitize user input data and set some special HTTP headers which make these attacks a bit more difficult to happen.
+* :white_check_mark: Sanitize user input data
+* :white_check_mark: Set special HTTP headers (helmet package)
+
+### Denial-Of-Service (DOS) Attack
+It happens when the attacker sends so many requests to a server that it breaks down and the application becomes unavailable.
+* :white_check_mark: Implement rate limiting
+* :white_check_mark: Limit body payload (in body parser)
+* :white_check_mark: Avoid evil regular expressions (could take an exponential time to run for non-matching inputs and they can be exploited to bring our entire application down)
+
+### NOSQL Query Injection
+Query injection happens when an attacker, instead of inputting valid data, injects some query in order to create query expressions that are gonna translate to true.
+* :white_check_mark: Use mongoose for MongoDB (because of SchemaTypes forces each value to have a well-defined data tab)
+* :white_check_mark: Sanitize user input data
+
+### Other Best Practices and Suggestions
+* :white_check_mark: Always use HTTPS
+* :white_check_mark: Create random password reset tokens with expiry dates
+* :white_check_mark: Deny access to JWT after password change
+* :white_check_mark: Don't commit sensitive config data to Git
+* :white_check_mark: Don't send error details to client
+* :memo: Prevent Cross-Site Request Forgery (csurf package) which is an attack that forces a user to execute unwanted actions on a web application in which they are currently logged in
+* :memo: Require re-authentication before a high value action, for example, making a payment or deleting something.
+* :memo: Implement a blacklist of untrusted JWT
+* :memo: Confirm user email address after first creating account
+* :memo: Keep user logged in with refesh tokens, which are basically to remember users. So, to keep them logged in forever or until they choose to log out.
+* :memo: Implement two-factor authentication
+* :white_check_mark: Prevent parameter polution causing Uncaught Exception, for example, try to just insert two field parameters into the query string that searches for all tours.
