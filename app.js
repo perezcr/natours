@@ -17,6 +17,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -25,7 +26,11 @@ const userRouter = require('./routes/userRoutes');
 
 const app = express();
 
-// 1. Middlewares
+// 1. Global Middlewares
+// Set security HTTP headers
+// Is best to use this package early in the middleware stack
+// Test: Open Postman -> do request -> look at amount of Headers
+app.use(helmet());
 
 // Development Logging
 if (process.env.NODE_ENV === 'development') {
