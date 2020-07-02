@@ -15,8 +15,27 @@ const signToken = (id) => {
   });
 };
 
+// The cookie is basically a small piece of text that a server can send to clients.
+// Then when the client receives a cookie, it will automatically store it and then
+// send it back along with all future requests to the same server
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
+
+  // Expires property will make that the browser or the client delete the cookie when expires
+  // Convert the days to miliseconds
+  // secure: only works behind secure connections (https)
+  const cookieOptions = {
+    expiresIn: new Date(
+      // 90 * 24(days) * 60(hours) * 60(minutos) * 1000(milliseconds)
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    // This will make it so that the cookie cannot be accessed or modified in any way by the browser. This is important in order to prevent XSS attacks.
+    httpOnly: true,
+  };
+  // The cookie will only be sent on an encrypted connection (HTTPS)
+  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+
+  res.cookie('jwt', token, cookieOptions);
 
   // Remove password from output
   user.password = undefined;
