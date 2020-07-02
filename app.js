@@ -16,6 +16,11 @@
 // to remember previous request
 const express = require('express');
 const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const hpp = require('hpp');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -24,17 +29,56 @@ const userRouter = require('./routes/userRoutes');
 
 const app = express();
 
-// 1. Middlewares
+// 1. Global Middlewares
+// Set security HTTP headers
+// Is best to use this package early in the middleware stack
+// Test: Open Postman -> do request -> look at amount of Headers
+app.use(helmet());
 
 // Development Logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+// 100 request from the same IP in one hour
+// Test: Open Postman -> do request -> look at Headers (X-RateLimit-Limit, X-RateLimit-Remaining)
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many requests from this IP, please try again in an hour!',
+});
+app.use('/api', limiter);
+
 // Reading data from body into req.body
 // Function that modify the incoming request data (middle of the request and response)
 // Not accept body larger than 10kb
 app.use(express.json({ limit: '10kb' }));
+
+// Data sanitization against NoSQL query injection
+// Clean all dollar signs $ on mongo queries
+// { "email": { "$gt": "" }, "password": "password" }
+app.use(mongoSanitize());
+
+// Data sanitization against XSS
+// Clean HTML code
+app.use(xss());
+
+// Prevent parameter polution
+// Clear query string -> api/v1/tours?sort=duration&sort=price
+// middleware only using the last one
+// Whitelist: api/v1/tours?duration=3&duration=5 -> results between 3 and 5
+app.use(
+  hpp({
+    whitelist: [
+      'difficulty',
+      'duration',
+      'maxGroupSize',
+      'price',
+      'ratingsAverage',
+      'ratingsQuantity',
+    ],
+  })
+);
 
 // Serving static files
 // The files that are sitting in our file system that we currently cannot access using routes

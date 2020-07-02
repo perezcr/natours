@@ -193,3 +193,99 @@ On the other hand, we have programming errors. Which are simply bugs that we dev
 </p>
 
 So, when we're talking about error handling with Express, we mainly just mean operational errors. Because these are the ones that are easy to catch and to handle with our Express application. And Express actually comes with error handling out of the box. So, all we have to do is to write a global express error handling middleware which will then catch errors coming from all over the application.
+
+## JWT
+JSON Web Tokens are a Stateless solution for authentication. So there is no need to store any session state on the server which of course is perfect for RESTful APIs. Because RESTful APIs should always be stateless
+
+### How JSON Web Token works?
+1. So the user's client starts by making a post request with the username or email and the password.
+2. The application then checks if the user exists and if the password is correct. And if so, a unique JWT for only that user is created using a secret string that is stored on a server.
+3. The server then sends that JWT back to the client.
+4. The client will store it either in a cookie or in local storage. And just like this the user is authenticated and basically logged into our application without leaving any state on the server. So the server does in fact not know which users are actually logged in. But of course, the user knows that he's logged in because he has a valid JSON Web Token which is a bit like a passport to access protected parts of the application.
+5. Each time a user wants to access a protected route like his user profile, he send his JWT along with the request. Is like showing his passport to get access to that route.
+6. The server will then verify if the Json Web Token is actually valid. So if the user is really who he says he is.
+7. If the token is actually valid, then the requested data will be sent to the client and if not, then there will be an error telling the user that he's not allowed to access that resource.
+
+This is how it's gonna work each time that he requests data from any protected route. All this communication must happen over https, in order to prevent that anyone can get access to passwords or JWT.
+<p align="center">
+  <img src="notes-imgs/8.png" alt="JWT">
+</p>
+
+### What a JWT looks like?
+JSON Web Token ISs an encoding string made up of three parts: Header, Payload and Signature.
+
+#### Header
+Metadata about the token itself.
+
+#### Payload
+The data that we can encode into the token. So the more data encode here, the bigger the JWT. These two parts are just plain text that will get encoded, but not encrypted. So anyone will be able to decode them and to read them. So we cannot store any sensitive data in here.
+
+#### Signature
+The signature is created using the header, the payload and the secret that is saved on the server.
+
+<p align="center">
+  <img src="notes-imgs/9.png" alt="JWT Structure">
+</p>
+
+### How Signing and Verifying works?
+
+#### Signing
+The signing algorithm takes the header, the payload and the secret to create a unique signature. Then together with the header and the payload, these signature forms the JWT, which then gets sent to the client.
+
+Once the server receives a JWT to grant access to a protected route, it needs to verify it in order to determine if the user really is who he claims to be. In other words, it will verify if no one changed the header and the payload data of the token. This verification step will check if no third party actually altered either the header or the payload of the JWT.
+
+#### Verifying
+Once the JWT is received, the verification will take it's header and payload and together with the secret that is still saved on the server, basically create a **test signature**. Now, we compare the test signature with the original signature that is still in the token. And if the test signature is the same as the original signature, then it means that the payload and the header have not been modified, and we can then authenticate the user.
+
+<p align="center">
+  <img src="notes-imgs/10.png" alt="Signing-Verifying JWT">
+</p>
+
+## Security Best Practices and Suggestions
+
+### Compromised Database
+An attacker gained access to our database.
+* :white_check_mark: Strongly encrypt passwords with salt and hash (bcrypt)
+* :white_check_mark: Strongly encrypt password reset tokens (SHA 256)
+
+### Brute Force Attacks
+Where the attacker basically tries to guess a password by trying millions and millions of random passwords until they find the right one.
+* :white_check_mark: Use bcrypt (to make login requests slow)
+* :white_check_mark: Implement rate limiting, which limits the number of requests coming from one single IP (express-rate-limiting)
+* :memo: Implement maximum login attempts
+
+### Cross-Site Scripting (XSS) Attacks
+The attacker tries to inject scripts into our page to run his malicious code.
+#### Frontend
+On the clients' side, this is especially dangerous because it allows the attacker to read the local storage, which is the reason why we should never ever store the JSON web token in local storage. Instead, it should be stored in an HTTPOnly cookie that makes it so that the browser can only receive and send the cookie but cannot access or modify it in any way. And so, that then makes it impossible for any attacker to steal the JSON web token that is stored in the cookie.
+* :white_check_mark: Store JWT in HTTPOnly cookies
+
+#### Backend
+On the backend side, in order to prevent XSS attacks, we should sanitize user input data and set some special HTTP headers which make these attacks a bit more difficult to happen.
+* :white_check_mark: Sanitize user input data
+* :white_check_mark: Set special HTTP headers (helmet package)
+
+### Denial-Of-Service (DOS) Attack
+It happens when the attacker sends so many requests to a server that it breaks down and the application becomes unavailable.
+* :white_check_mark: Implement rate limiting
+* :white_check_mark: Limit body payload (in body parser)
+* :white_check_mark: Avoid evil regular expressions (could take an exponential time to run for non-matching inputs and they can be exploited to bring our entire application down)
+
+### NOSQL Query Injection
+Query injection happens when an attacker, instead of inputting valid data, injects some query in order to create query expressions that are gonna translate to true.
+* :white_check_mark: Use mongoose for MongoDB (because of SchemaTypes forces each value to have a well-defined data tab)
+* :white_check_mark: Sanitize user input data
+
+### Other Best Practices and Suggestions
+* :white_check_mark: Always use HTTPS
+* :white_check_mark: Create random password reset tokens with expiry dates
+* :white_check_mark: Deny access to JWT after password change
+* :white_check_mark: Don't commit sensitive config data to Git
+* :white_check_mark: Don't send error details to client
+* :memo: Prevent Cross-Site Request Forgery (csurf package) which is an attack that forces a user to execute unwanted actions on a web application in which they are currently logged in
+* :memo: Require re-authentication before a high value action, for example, making a payment or deleting something.
+* :memo: Implement a blacklist of untrusted JWT
+* :memo: Confirm user email address after first creating account
+* :memo: Keep user logged in with refesh tokens, which are basically to remember users. So, to keep them logged in forever or until they choose to log out.
+* :memo: Implement two-factor authentication
+* :white_check_mark: Prevent parameter polution causing Uncaught Exception, for example, try to just insert two field parameters into the query string that searches for all tours.
