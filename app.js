@@ -18,6 +18,8 @@ const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -50,6 +52,15 @@ app.use('/api', limiter);
 // Function that modify the incoming request data (middle of the request and response)
 // Not accept body larger than 10kb
 app.use(express.json({ limit: '10kb' }));
+
+// Data sanitization against NoSQL query injection
+// Clean all dollar signs $ on mongo queries
+// { "email": { "$gt": "" }, "password": "password" }
+app.use(mongoSanitize());
+
+// Data sanitization against XSS
+// Clean HTML code
+app.use(xss());
 
 // Serving static files
 // The files that are sitting in our file system that we currently cannot access using routes
