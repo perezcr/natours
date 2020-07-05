@@ -103,6 +103,7 @@ const tourSchema = new mongoose.Schema(
         day: Number, // Day in which the people will go to this location
       },
     ],
+    guides: [{ type: mongoose.Schema.ObjectId, ref: 'User' }],
   },
   // By default, Mongoose does not include virtuals when you convert a document to JSON.
   // Set the toJSON schema option to { virtuals: true }.
@@ -126,6 +127,12 @@ tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
+
+/* tourSchema.pre('save', async function (next) {
+  const guidesPromises = this.guides.map(async (id) => await User.findById(id));
+  this.guides = await Promise.all(guidesPromises);
+  next();
+}); */
 
 /* tourSchema.post('save', function(doc, next) {
   // doc is the previous document saved into database
