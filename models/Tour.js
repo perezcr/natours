@@ -77,6 +77,32 @@ const tourSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    startLocation: {
+      // MongoDB uses a special data format called GeoJSON, to specify geospatial data
+      // We can specify a couple of properties in order for this object to be recognized as geospatial JSON
+      // type and coordinates props
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point'],
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number, // Day in which the people will go to this location
+      },
+    ],
   },
   // By default, Mongoose does not include virtuals when you convert a document to JSON.
   // Set the toJSON schema option to { virtuals: true }.
