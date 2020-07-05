@@ -289,3 +289,110 @@ Query injection happens when an attacker, instead of inputting valid data, injec
 * :memo: Keep user logged in with refesh tokens, which are basically to remember users. So, to keep them logged in forever or until they choose to log out.
 * :memo: Implement two-factor authentication
 * :white_check_mark: Prevent parameter polution causing Uncaught Exception, for example, try to just insert two field parameters into the query string that searches for all tours.
+
+## Data Modelling
+
+### Types of relationships between data
+
+#### 1:1
+When one field can only have one value (1 movie can only have 1 name).
+<p align="center">
+  <img src="notes-imgs/11.png" alt="1-1">
+</p>
+
+#### 1:Many
+MongoDB distinguish between three types of one to many relationships. So the difference here is based on the relative amount of the many. In relational databases there is just one to many without quantifying how much that many actually is. In MongoDB databases though it is an extremely important difference. Because its one of the factors that we're gonna use to decide if we should denormalize or normalize data.
+<p align="center">
+  <img src="notes-imgs/12.png" alt="1-Many">
+</p>
+
+#### Many:Many
+<p align="center">
+  <img src="notes-imgs/13.png" alt="Many-Many">
+</p>
+
+### Referencing/Normalization vs Embedding/Denormalization
+Each time we have two related datasets we can either represent that related data in a reference or normalized form or in an embedded or denormalized form.
+<p align="center">
+  <img src="notes-imgs/14.png" alt="Normalization">
+</p>
+This type of referencing is called child referencing.
+:+1: Performance: It's easier to query each document on its own.
+:-1: We need two queries to get data from referenced document.
+
+<p align="center">
+  <img src="notes-imgs/15.png" alt="Embedded">
+</p>
+:+1: Performance: We can get all the information in one query.
+:-1: Impossible to query the embedded document on its own.
+
+Note : We could of course begin our thought process with denormlized data and then come to the conclusion that its best to actually normalize the data.
+
+### When to embed and when to reference? A practical framework
+
+Now to actually take the decision; we need to combine all of these three criteria and not just use one of them in isolation. So for example; just because criteria number one says to embed it doesn't mean that we don't need to look at the other two criteria.
+
+#### 1. Relationship Type
+* So usually when we have 1:FEW relationship we will always embed the related dataset into the main dataset.
+* 1:MANY; things are a bit more fuzzy so its okay to either embed or reference. In that case we will have to decide according to the other two criteria.
+* 1:TON or MANY:MANY relationship we usually always reference the data. That's because if we actually did embed in this case we could quickly create way too large document. Even potentially surpassing the maximum of 16 megabytes.
+
+#### 2. Data Access Pattern
+Evaluate whether a certain dataset is mostly written to or mostly read from.
+* So if the dataset that we're deciding about is mostly read and the data is not updated a lot then we should probably embed that dataset.
+* A high read/write ratio just means that there is a lot more reading than writing. And a again, a dataset like that is a good candidate for embedding. The reason for this is that by embedding we only need one trip to the database per query. While for referencing we need two trips.
+* Now on the other hand, if our data is updated a lot then we should consider referencing or normalizing the data. That's because its more work for the database engine to update and embed a document than a more simple standalone document.
+
+#### 3. Data Closeness
+Which is just like a measure for how much the data is related.
+
+Example; All users can have many email addresses on their account and since they are so intrinsically connected to the user, there is no doubt emails should be embedded into the document. Now if we frequently need to query both of datasets on their own then that's a very good reason to normalize the data into two separate datasets. Even if they are closely related.
+
+<p align="center">
+  <img src="notes-imgs/16.png" alt="Embed vs Reference">
+</p>
+
+### Types of referencing
+Now, lets say that we have chosen to normalize our datasets. So in other words to reference data. Then after that we still have to choose between three different types of referencing.
+
+#### Child Referencing
+So in child referencing; we basically keep references to the related child documents in a parent document. However, the problem here is that this array of IDs can become very large if there are lots of children. And this is an anti-pattern in MongoDB.
+
+<p align="center">
+  <img src="notes-imgs/17.png" alt="CR">
+</p>
+
+#### Parent Referencing
+In parent referencing; it actually works the other way around. Here in each child document we keep a reference to the parent element. It is way more isolated and more standalone.
+
+<p align="center">
+  <img src="notes-imgs/18.png" alt="PR">
+</p>
+
+#### Two-Way Referencing
+Usually use this two-way referencing to design many to many relationships.
+
+<p align="center">
+  <img src="notes-imgs/19.png" alt="TWR">
+</p>
+
+#### Conclusion
+* Child referencing is best used for one to a few relationships. Where we know before hand that the array of child documents won't grow that much. On the other hand, parent referencing is best used for one to many and one to a ton relationships.
+
+* Note: Keep in mind that one of the most important principals of MongoDB data modeling is that array should never be allowed to grow indefinitely. In order to never break that 16 megabyte limit.
+
+### Summary
+
+* The most important principle is: Structure your data to **match the ways that your application queries and updates data**.
+* In other words: Identify the questions that arise from your **application's use cases** first, and then model your data so that the **questions can get answered** in the most efficient way.
+* In general, **always favor embedding**, unless there is a good reason not to embed. Especially on 1:FEW and 1:MANY relationships.
+* A 1:TON or a MANY:MANY relationships is usually a good reason to **reference** instead of embedding.
+* Also, favor **referencing** when data is updated a lot and if you need to frequently access a dataset on its own.
+* Use **embedding** when data is mostly read but rarely updated, and when two datasets belong intrinsically together.
+* Don't allow arrays to grow indefinitely. Therefore, if you need to normalize, use **child referencing** for 1:MANY relationships, and **parent referencing** for 1:TON relationships.
+* Use **two-way referencing** for MANY:MANY relationships.
+
+## Data Model
+<p align="center">
+  <img src="notes-imgs/20.png" alt="Data Model">
+</p>
