@@ -40,10 +40,15 @@ const reviewSchema = new mongoose.Schema(
 
 // Query middleware: allow run functions before or after that a query is executed
 reviewSchema.pre(/^find/, function (next) {
-  this.populate({
+  // Not populate tour ref because Tour itself already populate reviews
+  /* this.populate({
     path: 'tour',
     select: 'name',
   }).populate({
+    path: 'user',
+    select: 'name photo',
+  }); */
+  this.populate({
     path: 'user',
     select: 'name photo',
   });

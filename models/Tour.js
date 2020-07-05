@@ -119,6 +119,14 @@ tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
+// We do not want to store that array of review ID's that could then grow indefinitely in our database
+// Solution: Virtual Populate: Way of keeping that array of review ID's on a tour, but without actually persisting it to the database.
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id',
+});
+
 // Mongoose Middlewares
 // Four types of middlewares in mongoose: document, query, agregate and model middleware
 // pre or post hooks: define functions to run before o after a certain event
