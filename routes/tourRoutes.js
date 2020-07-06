@@ -1,4 +1,5 @@
 const express = require('express');
+const reviewRouter = require('./reviewRoutes');
 const {
   aliasTopTours,
   getAllTours,
@@ -12,6 +13,8 @@ const {
 const { protect, restrictTo } = require('../controllers/authController');
 
 const router = express.Router();
+
+router.use('/:tourId/reviews', reviewRouter);
 
 // Aliasing
 router.route('/top-5-cheap').get(aliasTopTours, getAllTours);
