@@ -1,8 +1,8 @@
 const express = require('express');
 const {
+  getUser,
   getAllUsers,
   createUser,
-  getUser,
   updateMe,
   updateUser,
   deleteMe,
@@ -10,6 +10,7 @@ const {
 } = require('../controllers/userController');
 const {
   protect,
+  restrictTo,
   signup,
   login,
   forgotPassword,
@@ -32,6 +33,10 @@ router.delete('/deleteMe', protect, deleteMe);
 
 router.route('/').get(getAllUsers).post(createUser);
 
-router.route('/:id').get(getUser).patch(updateUser).delete(deleteUser);
+router
+  .route('/:id')
+  .get(getUser)
+  .patch(protect, restrictTo('admin'), updateUser)
+  .delete(protect, restrictTo('admin'), deleteUser);
 
 module.exports = router;

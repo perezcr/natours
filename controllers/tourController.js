@@ -1,7 +1,6 @@
 const Tour = require('../models/Tour');
-const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appError');
+const factory = require('./handlerFactory');
 
 // Param-middleware: Middleware only just for certain parameters in URL. i.e.
 // router.param('id', checkId);
@@ -15,81 +14,6 @@ exports.aliasTopTours = async (req, res, next) => {
   req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
   next();
 };
-
-// Using json method set automatically content-type to application/json
-exports.getAllTours = catchAsync(async (req, res, next) => {
-  const features = new APIFeatures(Tour.find(), req.query)
-    .filter()
-    .sorting()
-    .limitFields()
-    .paginate();
-
-  const tours = await features.query;
-
-  res.status(200).json({
-    status: 'success',
-    requestAt: req.requestTime,
-    results: tours.length,
-    data: { tours },
-  });
-});
-
-exports.getTour = catchAsync(async (req, res, next) => {
-  // We only want to populate it here in the 'Get One Tour,' and not in the 'Get All Tours' because that would be a bit too much information to send down to a client when they get all the tours.
-  const tour = await Tour.findById(req.params.id).populate('reviews');
-
-  if (!tour) {
-    return next(new AppError('No tour found with that ID', 404));
-  }
-
-  res.status(200).json({
-    status: 'success',
-    data: { tour },
-  });
-});
-
-exports.createTour = catchAsync(async (req, res, next) => {
-  const newTour = await Tour.create(req.body);
-
-  res.status(201).json({
-    result: 'success',
-    data: {
-      tour: newTour,
-    },
-  });
-});
-
-exports.updateTour = catchAsync(async (req, res, next) => {
-  // new: true -> return the new document
-  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-
-  if (!tour) {
-    return next(new AppError('No tour found with that ID', 404));
-  }
-
-  res.status(200).json({
-    result: 'success',
-    data: {
-      tour,
-    },
-  });
-});
-
-exports.deleteTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndDelete(req.params.id);
-
-  if (!tour) {
-    return next(new AppError('No tour found with that ID', 404));
-  }
-  // 204 = No Content
-  res.status(204).json({
-    result: 'success',
-    data: null,
-  });
-});
 
 // Aggregation Pipeline
 exports.getToursStats = catchAsync(async (req, res, next) => {
@@ -182,3 +106,10 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+// We only want to populate it here in the 'Get One Tour,' and not in the 'Get All Tours' because that would be a bit too much information to send down to a client when they get all the tours.
+exports.getTour = factory.getOne(Tour, { path: 'reviews' });
+exports.getAllTours = factory.getAll(Tour);
+exports.createTour = factory.createOne(Tour);
+exports.updateTour = factory.updateOne(Tour);
+exports.deleteTour = factory.deleteOne(Tour);

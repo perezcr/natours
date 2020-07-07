@@ -2,11 +2,11 @@ const express = require('express');
 const reviewRouter = require('./reviewRoutes');
 const {
   aliasTopTours,
-  getAllTours,
-  createTour,
-  getTour,
   getToursStats,
   getMonthlyPlan,
+  getTour,
+  getAllTours,
+  createTour,
   updateTour,
   deleteTour,
 } = require('../controllers/tourController');
