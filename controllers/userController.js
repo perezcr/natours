@@ -4,6 +4,11 @@ const AppError = require('../utils/appError');
 const factory = require('./handlerFactory');
 const filterProps = require('../utils/filterProps');
 
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
+
 // Update information auth users themselves (name and email)
 exports.updateMe = catchAsync(async (req, res, next) => {
   // 1. Create error if user POSTs password data

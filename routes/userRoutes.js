@@ -1,5 +1,6 @@
 const express = require('express');
 const {
+  getMe,
   getUser,
   getAllUsers,
   createUser,
@@ -28,6 +29,7 @@ router.patch('/resetPassword/:token', resetPassword);
 
 router.patch('/updatePassword', protect, updatePassword);
 
+router.get('/me', protect, getMe, getUser);
 router.patch('/updateMe', protect, updateMe);
 router.delete('/deleteMe', protect, deleteMe);
 
