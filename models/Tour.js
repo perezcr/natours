@@ -113,6 +113,13 @@ const tourSchema = new mongoose.Schema(
   }
 );
 
+// Create an index for the price field because i believe that it is one of the most important that people will query for.
+// If we sometimes query for that field but combined with another one, then it's actually more efficient to create a compound index.
+// 1: means that we're sorting the price index in an ascending order.
+// -1: means that we're sorting the price index in an descending order.
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+tourSchema.index({ slug: 1 });
+
 // Virtual properties: Fields that will not be persistent, will not be saved into db
 // We cannot use virtual properties in queries
 tourSchema.virtual('durationWeeks').get(function () {

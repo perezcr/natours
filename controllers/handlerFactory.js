@@ -29,6 +29,11 @@ exports.getAll = (Model) =>
       .limitFields()
       .paginate();
 
+    // explain(): Which makes this query return detailed execution stats instead of the actual query result. This method is useful for determining what index your queries use.
+    // "executionStats" props
+    // "nReturned": Number of documents that were returned were three
+    // "totalDocsExamined": Number of documents that were examined is nine (all documents)
+    // const documents = await features.query.explain();
     const documents = await features.query;
 
     const resourceName = Model.collection.name;

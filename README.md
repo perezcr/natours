@@ -174,8 +174,23 @@ Middleware that can act on the currently processed document. In document middlew
 ##### Query Middleware
 Allow run functions before or after that a query is executed.
 
-#### Aggregation Middleware
+##### Aggregation Middleware
 Aggregate middleware executes when you call **exec()** on an aggregate object.
+
+#### Indexes
+Indexes support the efficient execution of queries in MongoDB. Without indexes, MongoDB must perform a collection scan, i.e. scan every document in a collection, to select those documents that match the query statement. If an appropriate index exists for a query, MongoDB can use the index to limit the number of documents it must inspect.
+
+##### Example
+If we sometimes query for that field but combined with another one, then it's actually more efficient to create a compound index.
+```javascript
+// 1: means that we're sorting the price index in an ascending order.
+// -1: means that we're sorting the price index in an descending order.
+modelSchema.index({ slug: 1 });
+modelSchema.index({ price: 1, ratingsAverage: -1 });
+```
+* Basically we need to carefully study the access patterns of our application in order to figure out which fields are queried the most and then set the indexes for these fields.
+* Indexes should not be used on small tables.
+* Each index needs to be updated each time that the collection is updated. So if you have a collection with a high write-read ratio, then it would make absolutely no sense to create an index on any field in this collection because the cost of always updating the indexand keeping it in memory clearly outweighs the benefit of having the index in the first place if we rarely have searches, so have queries, for that collection.
 
 ## Error Handling
 There are two types of errors that can occur **Operational Errors** and **Programming Errors**.
