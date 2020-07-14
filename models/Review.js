@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Tour = require('./Tour');
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -52,6 +53,42 @@ reviewSchema.pre(/^find/, function (next) {
     path: 'user',
     select: 'name photo',
   });
+  next();
+});
+
+// Calculate the average rating and number of ratings of a tour each time that a new review is added to that tour or also when a review is updated or deleted
+// Static method is a class method
+reviewSchema.statics.calculateAverageRatings = async function (tourId) {
+  const statsQuery = await this.aggregate([
+    {
+      $match: { tour: tourId },
+    },
+    {
+      $group: {
+        _id: '$tour',
+        nRating: { $sum: 1 },
+        avgRating: { $avg: '$rating' },
+      },
+    },
+  ]);
+
+  const [stats] = statsQuery;
+  // If there are not reviews so assign default value
+  const propsToUpdate = {
+    ratingsQuantity: stats ? stats.nRating : 0,
+    ratingsAverage: stats ? stats.avgRating : 4.5,
+  };
+
+  await Tour.findByIdAndUpdate(tourId, propsToUpdate);
+};
+
+// Execute static method when a review is created
+// Execute static method when a review is updated or deleted
+// findByIdAndUpdate, findByIdAndDelete: behind the scenes is only just a shorthand for findOneAndUpdate, findOneAndDelete with the current ID
+reviewSchema.post(/save|^findOne/, async function (doc, next) {
+  // Review.calculateAverageRatings()
+  // This points to the current model (doc.constructor)
+  await doc.constructor.calculateAverageRatings(doc.tour);
   next();
 });
 
