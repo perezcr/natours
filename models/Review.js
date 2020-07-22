@@ -18,26 +18,26 @@ const reviewSchema = new mongoose.Schema(
       default: Date.now(),
       select: false,
     },
-    tour: [
-      {
-        type: mongoose.Schema.ObjectId,
-        ref: 'Tour',
-        required: [true, 'Review must belong to a tour'],
-      },
-    ],
-    user: [
-      {
-        type: mongoose.Schema.ObjectId,
-        ref: 'User',
-        required: [true, 'Review must belong to a user'],
-      },
-    ],
+    tour: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Tour',
+      required: [true, 'Review must belong to a tour'],
+    },
+    user: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+      required: [true, 'Review must belong to a user'],
+    },
   },
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }
 );
+
+// Problem: Each user should only review each tour once. Duplicate review happens when there is a review with the same user and the same tour ID.
+// Each combination of tour and user has always to be unique.
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
 
 // Query middleware: allow run functions before or after that a query is executed
 reviewSchema.pre(/^find/, function (next) {
