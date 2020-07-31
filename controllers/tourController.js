@@ -126,10 +126,59 @@ exports.getToursWithin = catchAsync(async (req, res, next) => {
   const tours = await Tour.find({
     startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } },
   });
+
   res.status(200).json({
     status: 'success',
     results: tours.length,
     data: { tours },
+  });
+});
+
+exports.getDistances = catchAsync(async (req, res, next) => {
+  const { latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  // 1mt = 0.000621371mi
+  // 1mt = 0.001km
+  const multiplier = unit === 'mi' ? 0.000621371 : 0.001;
+
+  if (!lat || !lng) {
+    next(new AppError('Please provide latitude and logitude in the format lat,lng', 400));
+  }
+
+  // $geoNear always needs to be the first one in the pipeline.
+  // Note: $geoNear requires that at least one of our fields contains a geospatial index.
+  // If there's only one field with a geospatial index then this $geoNear stage here will automatically use that index in order to perform the calculation.
+  // But if you have multiple fields with geospatial indexes then you need to use the keys parameter in order to define the field that you want to use for calculations.
+  const distances = await Tour.aggregate([
+    {
+      $geoNear: {
+        // near is the point from which to calculate the distances.
+        // So all the distances will be calculated from this point that we define here, and then all the startLocations.
+        near: {
+          type: 'Point',
+          coordinates: [Number(lng), Number(lat)],
+        },
+        // Field that will be created and where all the calculated distances will be stored
+        distanceField: 'distance',
+        // By default the distance is given in meters so we need to convert to km or mi
+        distanceMultiplier: multiplier,
+      },
+    },
+    {
+      // $project: Passes along the documents with the requested fields to the next stage in the pipeline.
+      // 0 not shows up or 1 shows up
+      $project: {
+        distance: 1,
+        name: 1,
+      },
+    },
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    results: distances.length,
+    data: { tours: distances },
   });
 });
 

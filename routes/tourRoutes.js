@@ -5,6 +5,7 @@ const {
   getToursStats,
   getMonthlyPlan,
   getToursWithin,
+  getDistances,
   getTour,
   getAllTours,
   createTour,
@@ -29,6 +30,9 @@ router
 // /tours-within?distance=233&center=-40,45&unit=mi
 // /tours-within/distance/233/center/-40,45/unit/mi -> cleaner
 router.route('/tours-within/:distance/center/:latlng/unit/:unit').get(getToursWithin);
+
+// We're really gonna calculate the distance from a certain point to all the tours that we have in our collection.
+router.route('/distances/:latlng/unit/:unit').get(getDistances);
 
 router
   .route('/')

@@ -123,7 +123,7 @@ tourSchema.index({ price: 1, ratingsAverage: -1 });
 tourSchema.index({ slug: 1 });
 // For geospatial data, this index needs to be a 2D sphere index if the data describes real points on the Earth like sphere.
 // startLocation here should be indexed to a 2D sphere.
-tourSchema.index({ startLocation: '2dsphere' });
+tourSchema.index({ 'startLocation.coordinates': '2dsphere' });
 
 // Virtual properties: Fields that will not be persistent, will not be saved into db
 // We cannot use virtual properties in queries
@@ -186,8 +186,19 @@ tourSchema.post(/^find/, function (docs, next) {
 // 3. Aggregation middleware
 // Hide the secret tours on aggregation pipelines
 tourSchema.pre('aggregate', function (next) {
+  const filterSecretTours = { $match: { secretTour: { $ne: true } } };
+
+  const [firstStageInPipeline] = this.pipeline();
+  // If the first stage is $geoNear must avoid agreggate other stage in beginning of the pipeline
+  // eslint-disable-next-line no-prototype-builtins
+  if (firstStageInPipeline.hasOwnProperty('$geoNear')) {
+    // Add filterStage after that $geoNear stage
+    this.pipeline().splice(1, 0, filterSecretTours);
+
+    return next();
+  }
   // Aggregate other stage for filtering secretTours in beginning of stage's array
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+  this.pipeline().unshift(filterSecretTours);
 
   // eslint-disable-next-line no-console
   console.log(this.pipeline());
