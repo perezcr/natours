@@ -121,6 +121,9 @@ const tourSchema = new mongoose.Schema(
 // -1: means that we're sorting the price index in an descending order.
 tourSchema.index({ price: 1, ratingsAverage: -1 });
 tourSchema.index({ slug: 1 });
+// For geospatial data, this index needs to be a 2D sphere index if the data describes real points on the Earth like sphere.
+// startLocation here should be indexed to a 2D sphere.
+tourSchema.index({ startLocation: '2dsphere' });
 
 // Virtual properties: Fields that will not be persistent, will not be saved into db
 // We cannot use virtual properties in queries

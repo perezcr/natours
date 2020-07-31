@@ -1,6 +1,7 @@
 const Tour = require('../models/Tour');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
+const AppError = require('../utils/appError');
 
 // Param-middleware: Middleware only just for certain parameters in URL. i.e.
 // router.param('id', checkId);
@@ -104,6 +105,31 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
     data: {
       plan,
     },
+  });
+});
+
+exports.getToursWithin = catchAsync(async (req, res, next) => {
+  const { distance, latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  // Radius is distance converted to radians
+  // Divide distance by the radius of the earth.
+  // Radius of earth depends unit (mi -> 3963.2), (km -> 6378.1)
+  const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+
+  if (!lat || !lng) {
+    next(new AppError('Please provide latitude and logitude in the format lat,lng', 400));
+  }
+  // geoWithin basically it finds documents within a certain geometry.
+  // If you specify the distance of 250 km, then that means you want to find all the tour documents within a sphere that has a radius of 250 miles.
+  // Mongodb expects the radius of our sphere in radians
+  const tours = await Tour.find({
+    startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } },
+  });
+  res.status(200).json({
+    status: 'success',
+    results: tours.length,
+    data: { tours },
   });
 });
 
