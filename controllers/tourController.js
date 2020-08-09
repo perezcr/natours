@@ -1,6 +1,6 @@
 const Tour = require('../models/Tour');
-const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
+const factory = require('./handlerFactory');
 const AppError = require('../utils/appError');
 
 // Param-middleware: Middleware only just for certain parameters in URL. i.e.
@@ -15,80 +15,6 @@ exports.aliasTopTours = async (req, res, next) => {
   req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
   next();
 };
-
-// Using json method set automatically content-type to application/json
-exports.getAllTours = catchAsync(async (req, res, next) => {
-  const features = new APIFeatures(Tour.find(), req.query)
-    .filter()
-    .sorting()
-    .limitFields()
-    .paginate();
-
-  const tours = await features.query;
-
-  res.status(200).json({
-    status: 'success',
-    requestAt: req.requestTime,
-    results: tours.length,
-    data: { tours },
-  });
-});
-
-exports.getTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findById(req.params.id);
-
-  if (!tour) {
-    return next(new AppError('No tour found with that ID', 404));
-  }
-
-  res.status(200).json({
-    status: 'success',
-    data: { tour },
-  });
-});
-
-exports.createTour = catchAsync(async (req, res, next) => {
-  const newTour = await Tour.create(req.body);
-
-  res.status(201).json({
-    result: 'success',
-    data: {
-      tour: newTour,
-    },
-  });
-});
-
-exports.updateTour = catchAsync(async (req, res, next) => {
-  // new: true -> return the new document
-  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-
-  if (!tour) {
-    return next(new AppError('No tour found with that ID', 404));
-  }
-
-  res.status(200).json({
-    result: 'success',
-    data: {
-      tour,
-    },
-  });
-});
-
-exports.deleteTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndDelete(req.params.id);
-
-  if (!tour) {
-    return next(new AppError('No tour found with that ID', 404));
-  }
-  // 204 = No Content
-  res.status(204).json({
-    result: 'success',
-    data: null,
-  });
-});
 
 // Aggregation Pipeline
 exports.getToursStats = catchAsync(async (req, res, next) => {
@@ -181,3 +107,84 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.getToursWithin = catchAsync(async (req, res, next) => {
+  const { distance, latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  // Radius is distance converted to radians
+  // Divide distance by the radius of the earth.
+  // Radius of earth depends unit (mi -> 3963.2), (km -> 6378.1)
+  const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+
+  if (!lat || !lng) {
+    next(new AppError('Please provide latitude and logitude in the format lat,lng', 400));
+  }
+  // geoWithin basically it finds documents within a certain geometry.
+  // If you specify the distance of 250 km, then that means you want to find all the tour documents within a sphere that has a radius of 250 miles.
+  // Mongodb expects the radius of our sphere in radians
+  const tours = await Tour.find({
+    startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } },
+  });
+
+  res.status(200).json({
+    status: 'success',
+    results: tours.length,
+    data: { tours },
+  });
+});
+
+exports.getDistances = catchAsync(async (req, res, next) => {
+  const { latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  // 1mt = 0.000621371mi
+  // 1mt = 0.001km
+  const multiplier = unit === 'mi' ? 0.000621371 : 0.001;
+
+  if (!lat || !lng) {
+    next(new AppError('Please provide latitude and logitude in the format lat,lng', 400));
+  }
+
+  // $geoNear always needs to be the first one in the pipeline.
+  // Note: $geoNear requires that at least one of our fields contains a geospatial index.
+  // If there's only one field with a geospatial index then this $geoNear stage here will automatically use that index in order to perform the calculation.
+  // But if you have multiple fields with geospatial indexes then you need to use the keys parameter in order to define the field that you want to use for calculations.
+  const distances = await Tour.aggregate([
+    {
+      $geoNear: {
+        // near is the point from which to calculate the distances.
+        // So all the distances will be calculated from this point that we define here, and then all the startLocations.
+        near: {
+          type: 'Point',
+          coordinates: [Number(lng), Number(lat)],
+        },
+        // Field that will be created and where all the calculated distances will be stored
+        distanceField: 'distance',
+        // By default the distance is given in meters so we need to convert to km or mi
+        distanceMultiplier: multiplier,
+      },
+    },
+    {
+      // $project: Passes along the documents with the requested fields to the next stage in the pipeline.
+      // 0 not shows up or 1 shows up
+      $project: {
+        distance: 1,
+        name: 1,
+      },
+    },
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    results: distances.length,
+    data: { tours: distances },
+  });
+});
+
+// We only want to populate it here in the 'Get One Tour,' and not in the 'Get All Tours' because that would be a bit too much information to send down to a client when they get all the tours.
+exports.getTour = factory.getOne(Tour, { path: 'reviews' });
+exports.getAllTours = factory.getAll(Tour);
+exports.createTour = factory.createOne(Tour);
+exports.updateTour = factory.updateOne(Tour);
+exports.deleteTour = factory.deleteOne(Tour);
