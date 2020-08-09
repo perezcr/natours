@@ -1,3 +1,6 @@
+## API Documentation
+Check out the [documentation here.](https://documenter.getpostman.com/view/6921681/T1Dv8uXo)
+
 ## Architecture
 <p align="center">
   <img src="notes-imgs/4.png" alt="Architecture">

@@ -112,6 +112,7 @@ const tourSchema = new mongoose.Schema(
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    id: false,
   }
 );
 
@@ -128,7 +129,7 @@ tourSchema.index({ 'startLocation.coordinates': '2dsphere' });
 // Virtual properties: Fields that will not be persistent, will not be saved into db
 // We cannot use virtual properties in queries
 tourSchema.virtual('durationWeeks').get(function () {
-  return this.duration / 7;
+  return this.duration ? this.duration / 7 : undefined;
 });
 
 // We do not want to store that array of review ID's that could then grow indefinitely in our database

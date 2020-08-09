@@ -66,7 +66,7 @@ userSchema.pre('save', async function (next) {
 // This function is going to run when the user change the password
 userSchema.pre('save', function (next) {
   // If password was not modified OR if the document is new then next()
-  if (!this.isModified('password') || this.isNeW) {
+  if (!this.isModified('password') || this.isNew) {
     return next();
   }
   // It's necessary wait one second because is posibble that the token signs first that executing this operation
